@@ -3,6 +3,8 @@ from typing import Optional
 from dataclasses import dataclass
 import uuid
 
+from utils import get_sample_audio, get_sample_image, get_sample_text
+
 
 class ResponseType:
     TEXT = 0
@@ -71,26 +73,6 @@ class ResponsePayload:
             audio=audio if audio else None,
             image=image if image else None,
         )
-
-
-def get_sample_image() -> bytes:
-    sample_image_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../sample", "sample.jpg")
-    )
-    with open(sample_image_path, "rb") as f:
-        return f.read()
-
-
-def get_sample_audio() -> bytes:
-    sample_audio_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../sample", "sample.mp3")
-    )
-    with open(sample_audio_path, "rb") as f:
-        return f.read()
-
-
-def get_sample_text() -> str:
-    return "Hello, World!"
 
 
 def get_sample_response_payload(type: int) -> ResponsePayload:

@@ -13,7 +13,7 @@ if __name__ == "__main__":
         input_type = int(input())
         if input_type == 1:
             text_msg = str(input())
-            payload = RequestPayload(type=RequestType.TEXT, text=text_msg, audio=None, image=None)
+            payload = RequestPayload(type=RequestType.TEXT, text=text_msg, audio=None, video=None)
         elif input_type == 2:
             audio_path = str(input())
             with open(audio_path, mode='rb') as file:
