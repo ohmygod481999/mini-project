@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from dataclasses import dataclass
+import uuid
 
 
 class ResponseType:
@@ -11,21 +12,33 @@ class ResponseType:
 
 @dataclass
 class ResponsePayload:
+    message_id: uuid.UUID
     type: int
-    text: bytes
+    text: str
     audio: Optional[bytes]
     image: Optional[bytes]
 
     def encode(self) -> bytes:
-        text_bytes_len = len(self.text)
+        text_bytes = self.text.encode("utf-8")
+        text_bytes_len = len(text_bytes)
         audio_bytes_len = len(self.audio) if self.audio else 0
         image_bytes_len = len(self.image) if self.image else 0
 
-        if audio_bytes_len > 4 or image_bytes_len > 4 or text_bytes_len > 4:
-            raise ValueError("data is too large")
+        print(f"--DEBUG-- text_bytes_len: {text_bytes_len}")
+        print(f"--DEBUG-- audio_bytes_len: {audio_bytes_len}")
+        print(f"--DEBUG-- image_bytes_len: {image_bytes_len}")
+
+        # 1MB
+        MAX_FILE_SIZE = 1024 * 1024
+        if audio_bytes_len > MAX_FILE_SIZE:
+            raise ValueError("Audio file too large")
+
+        if image_bytes_len > MAX_FILE_SIZE:
+            raise ValueError("Image file too large")
 
         header = b"".join(
             [
+                self.message_id.bytes,
                 self.type.to_bytes(1, byteorder="big"),
                 text_bytes_len.to_bytes(4, byteorder="big"),
                 audio_bytes_len.to_bytes(4, byteorder="big"),
@@ -33,7 +46,7 @@ class ResponsePayload:
         )
         body = b"".join(
             [
-                self.text,
+                text_bytes,
                 self.audio or b"",
                 self.image or b"",
             ]
@@ -42,13 +55,22 @@ class ResponsePayload:
 
     @staticmethod
     def decode(payload: bytes) -> "ResponsePayload":
-        type = int.from_bytes(payload[:1], byteorder="big")
-        text_len = int.from_bytes(payload[1:5], byteorder="big")
-        audio_len = int.from_bytes(payload[5:9], byteorder="big")
-        text = payload[9 : 9 + text_len]
-        audio = payload[9 + text_len : 9 + text_len + audio_len]
-        image = payload[9 + text_len + audio_len :]
-        return ResponsePayload(type=type, text=text, audio=audio, image=image)
+        message_id = uuid.UUID(bytes=payload[:16])
+        type = int.from_bytes(payload[16:17], byteorder="big")
+        text_bytes_len = int.from_bytes(payload[17:21], byteorder="big")
+        audio_bytes_len = int.from_bytes(payload[21:25], byteorder="big")
+
+        text = payload[25 : 25 + text_bytes_len].decode("utf-8")
+        audio = payload[25 + text_bytes_len : 25 + text_bytes_len + audio_bytes_len]
+        image = payload[25 + text_bytes_len + audio_bytes_len :]
+
+        return ResponsePayload(
+            message_id=message_id,
+            type=type,
+            text=text,
+            audio=audio if audio else None,
+            image=image if image else None,
+        )
 
 
 def get_sample_image() -> bytes:
@@ -67,8 +89,8 @@ def get_sample_audio() -> bytes:
         return f.read()
 
 
-def get_sample_text() -> bytes:
-    return "Hello, World!".encode("utf-8")
+def get_sample_text() -> str:
+    return "Hello, World!"
 
 
 def get_sample_response_payload(type: int) -> ResponsePayload:
@@ -79,6 +101,7 @@ def get_sample_response_payload(type: int) -> ResponsePayload:
         else get_sample_image()
     )
     return ResponsePayload(
+        message_id=uuid.uuid4(),
         type=type,
         text=get_sample_text(),
         audio=audio,
