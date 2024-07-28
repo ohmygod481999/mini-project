@@ -6,6 +6,10 @@ from utils import get_sample_audio, get_sample_text, get_sample_video
 
 
 class RequestType:
+    """
+    RequestType represents the type of a message request.
+    """
+
     TEXT = 0
     AUDIO = 1
     VIDEO = 2
@@ -13,6 +17,10 @@ class RequestType:
 
 @dataclass
 class RequestPayload:
+    """
+    RequestPayload represents a message request to be sent to the server.
+    """
+
     message_id: uuid.UUID
     type: int
     text: Optional[str]
@@ -20,6 +28,9 @@ class RequestPayload:
     video: Optional[bytes]
 
     def encode(self) -> bytes:
+        """
+        Encodes the request payload into bytes.
+        """
         return b"".join(
             [
                 self.message_id.bytes,
@@ -32,6 +43,9 @@ class RequestPayload:
 
     @staticmethod
     def decode(payload: bytes) -> "RequestPayload":
+        """
+        Decodes the request payload from bytes.
+        """
         message_id = uuid.UUID(bytes=payload[:16])
         type = int.from_bytes(payload[16:17], byteorder="big")
 

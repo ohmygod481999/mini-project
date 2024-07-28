@@ -1,4 +1,9 @@
-from response import ResponsePayload, ResponseType, get_sample_response_payload
+from response import (
+    ResponsePayload,
+    ResponseType,
+    get_error_payload,
+    get_sample_response_payload,
+)
 
 
 def test_response_encode_text_audio_image() -> None:
@@ -46,3 +51,27 @@ def test_response_encode_text() -> None:
 
     assert resp.audio == None
     assert decoded_resp.audio == None
+
+
+def test_response_encode_error() -> None:
+    resp = get_error_payload("test error msg")
+
+    encoded_resp = resp.encode()
+
+    decoded_resp = ResponsePayload.decode(encoded_resp)
+
+    assert resp.message_id == decoded_resp.message_id
+    assert resp.text == decoded_resp.text
+    assert resp.image == decoded_resp.image
+    assert resp.audio == decoded_resp.audio
+
+    assert resp.text == ""
+    assert decoded_resp.text == ""
+
+    assert resp.image == None
+    assert decoded_resp.image == None
+
+    assert resp.audio == None
+    assert decoded_resp.audio == None
+
+    assert resp.error_message == decoded_resp.error_message
