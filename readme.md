@@ -31,6 +31,9 @@ Any database that supports locking can be used. Redis is my choice because it is
 ### Chat history service
 It provide an API layer for persisting and listing message. 
 It connect to a database to save text message, and connect to a file storage like S3 to store audio, video files
+
+(This diagram is written in plant uml, you can paste code into [https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000] to see the diagram)
+
 ```plantuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 ' uncomment the following line and comment the first to use locally
@@ -72,8 +75,8 @@ chat_retrieve_api -d-> file_database
 
 ## Sequence diagram
 ### Open a connection and messaging flow
+(This diagram is written in plant uml, you can paste code into [https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000] to see the diagram)
 ```plantuml
-
 title Messaging Sequence Diagram
 
 skinparam shadowing false
@@ -101,10 +104,6 @@ participant "Chat history" as ch
 client -> lb: WSS /connect?clientId=xxx&timeZone=xxx
 lb -> chatServer: route trafic
 chatServer -> chatServer: check timeZone if it match condition
-
-alt Fail: timezone doesn't match
-    chatServer -> client: disconnect 400 bad request
-end
 
 chatServer -> ds: aquireConnection for {clientId}
 ds -> chatServer: connectionGranted for {clientId}
