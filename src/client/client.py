@@ -1,18 +1,20 @@
 import asyncio
+from datetime import datetime
 import os
 import sys
-import websockets
-from websockets.sync.client import connect
 import pytz
-from tzlocal import get_localzone
+import websockets
+from chatserver.config import Config
 from file_storage import FileStorage, LocalFileStorage
-from request import RequestPayload, get_sample_request_payload
+from request import get_sample_request_payload
 from request import RequestType
 from response import ResponsePayload, ResponseType
 import aioconsole
 
 client_file_storage: FileStorage = LocalFileStorage(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../file_storage"))
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../client_file_storage")
+    )
 )
 
 
@@ -86,14 +88,26 @@ async def main():
     # get client_id from args
 
     client_id = sys.argv[1] if len(sys.argv) > 1 else None
+    time_zone = sys.argv[2] if len(sys.argv) > 2 else None
     if not client_id:
         print("Client id is required")
         return
-    # time_zone = get_localzone()
-    time_zone = "America/New_York"
-    path = "ws://localhost:8765?client_id={client_id}&time_zone={time_zone}".format(
-        client_id=client_id, time_zone=time_zone
+    if not time_zone:
+        print("Time zone is required")
+        return
+    tz = pytz.timezone(time_zone)
+    client_time = datetime.now(tz)
+    print(f"Client time zone: {time_zone}, current time: {client_time}")
+
+    SERVER_HOST = Config.SERVER_HOST
+    SERVER_PORT = Config.SERVER_PORT
+    path = "ws://{server_host}:{server_port}?client_id={client_id}&time_zone={time_zone}".format(
+        server_host=SERVER_HOST,
+        server_port=SERVER_PORT,
+        client_id=client_id,
+        time_zone=time_zone,
     )
+    print(path)
     try:
         async with websockets.connect(path) as websocket:
             first_msg = await websocket.recv()
@@ -123,4 +137,5 @@ async def main():
         print(f"Connection failed: {e}")
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

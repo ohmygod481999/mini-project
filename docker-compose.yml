@@ -1,0 +1,51 @@
+version: '3'
+services:
+  chat_server:
+    depends_on:
+      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
+    # command: python src/chatserver/chat_server.py
+    command: ["tail", "-f", "/dev/null"] # Keeps the container running
+    stdin_open: true
+    tty: true
+
+    environment:
+      - SERVER_PORT=8765
+      - MAX_CONNECTIONS=5
+      - MAX_CONNECTION_PER_CLIENT=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CONCURRENT_CONTROL_REDIS_KEY=concurrent_control
+  pytest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: pytest
+    environment:
+      - SERVER_PORT=8765
+      - MAX_CONNECTIONS=5
+      - MAX_CONNECTION_PER_CLIENT=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CONCURRENT_CONTROL_REDIS_KEY=concurrent_control
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # command: python src/client/client.py 123 America/New_York
+    volumes:
+      - ./client_file_storage:/app/client_file_storage"
+
+    command: /bin/bash
+    environment:
+      - SERVER_PORT=8765
+      - SERVER_HOST=chat_server
+      # - SERVER_HOST=host.docker.internal

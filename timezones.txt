@@ -1,0 +1,11 @@
+Asia/Ho_Chi_Minh
+America/New_York
+Europe/London
+Asia/Tokyo
+Australia/Sydney
+Africa/Cairo
+Pacific/Honolulu
+America/Los_Angeles
+Europe/Paris
+Asia/Dubai
+Africa/Johannesburg

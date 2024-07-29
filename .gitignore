@@ -1,2 +1,4 @@
 __pycache__/
 .pytest_cache/
+client_file_storage/
+.DS_Store

@@ -4,6 +4,8 @@ from typing import Optional
 import redis.asyncio as redis
 from redis.asyncio.client import Pipeline
 
+from chatserver.config import Config
+
 
 class ConcurrencyControl:
     def __init__(
@@ -12,7 +14,7 @@ class ConcurrencyControl:
         max_connection_per_client: int,
         redis_key: Optional[str] = None,
     ) -> None:
-        self.redis_client = redis.StrictRedis(host="localhost", port=6379, db=0)
+        self.redis_client = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=0)
         self.redis_key = redis_key if redis_key else "concurrency_control"
         self.max_connections = max_connections
         self.max_connections_per_client = max_connection_per_client

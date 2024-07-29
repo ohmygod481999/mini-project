@@ -1,0 +1,6 @@
+# Ignore Python and pytest cache files
+*.pyc
+__pycache__/
+
+# Ignore client_file_storage folder at root
+/client_file_storage/

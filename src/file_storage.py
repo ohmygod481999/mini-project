@@ -42,8 +42,3 @@ class LocalFileStorage(FileStorage):
 
     def _get_file_path(self, file_name):
         return os.path.join(self.storage_path, file_name)
-
-
-file_storage: FileStorage = LocalFileStorage(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../file_storage"))
-)
